@@ -28,7 +28,7 @@ class Stop < ActiveRecord::Base
     #       connection.
     #   3.  If two StopTime records get you to the same stop, only keep the shortest time
     dow = at_time.strftime('%A').to_sym
-    cals = Calendar.find([dow => 1])
+    cals = Calendar.find({dow => 1})
     sids = cals.collect {|c| c.service_id}.uniq
     #trips = Trip.find(:all, :conditions => "where service_id in (?)
 
