@@ -27,19 +27,11 @@ class Stop < ActiveRecord::Base
     #   2.  remove duplicate route_ids.  A possible exception is if departure_time < 2mins after at_time, since they may miss that
     #       connection.
     #   3.  If two StopTime records get you to the same stop, only keep the shortest time
-    dow = at_time.strftime('%A').to_sym
-    cals = Calendar.find({dow => 1})
-    sids = cals.collect {|c| c.service_id}.uniq
-    #trips = Trip.find(:all, :conditions => "where service_id in (?)
-
-    if stop_time != null
-      conds = [ 'stop_id = ? and departure_time >= ? and trip_id != ?', self.stop_id, at_time.strftime('%H:%M:%S'), stop_time.trip_id ]
-    else
-      conds = [ 'stop_id = ? and departure_time >= ?', self.stop_id, at_time.strftime('%H:%M:%S') ]
-    end
+    trips = Trip.trips_between_at_stop(self.stop_id,at_time,at_time + 1.hour,:limit => 30)
 
     stop_times = StopTime.find(:all, :conditions => conds, :limit => 20)
     # add the corresponding Stops to ret
+
     # take the lat/lng of the stop and search up to @@max_walk away for other stops.
     # add those Stops to ret
 
