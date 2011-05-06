@@ -10,6 +10,7 @@ gem 'mysql'
 gem 'shoulda'
 gem 'fastercsv'
 gem 'paperclip'
+gem 'geokit'
 
 # Use unicorn as the web server
 # gem 'unicorn'
