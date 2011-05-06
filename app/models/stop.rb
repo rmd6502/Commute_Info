@@ -71,7 +71,7 @@ class Stop < ActiveRecord::Base
       ret << {
         :Stop => s,
         :Method => "Walk "+dist.to_s+" miles to the "+s.stop_name+" station",
-        :Time => dist*60*/2.5
+        :Time => (dist*60/2.5)
       }
     end
     return ret
