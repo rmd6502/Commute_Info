@@ -6,7 +6,7 @@ class Stop < ActiveRecord::Base
   # Most people are willing to walk a max of 1/4 mile.
   @@max_walk = 0.25
 
-  def neighbor_nodes(at_time,stop_time)
+  def neighbor_nodes(at_time,stop_time = nil)
     # There are two types of neighbor nodes: 
     #   * nodes reachable from trains in the same station 
     #   * nodes within a <max_walk> distance from the current station
@@ -33,11 +33,15 @@ class Stop < ActiveRecord::Base
 
     # add the corresponding Stops to ret
     trips.each do |t|
-      st = t.stop_time_for_stop(self)
+      st = t.stop_time_for_stop(self,at_time)
+      if st == nil
+        puts "\nno stop time for trip "+t.inspect+" stop "+self.inspect+"\n\n"
+        next
+      end
       stop_seq = st.stop_sequence
       dif_time = (Time.parse(st.departure_time) - at_time)/60
       t.stop_times.each do |s|
-        next if s.stop_sequence < stop_seq
+        next if s.stop_sequence <= stop_seq
         stopcount = (s.stop_sequence - stop_seq)
         method = ""
         if dif_time > 0
@@ -58,10 +62,10 @@ class Stop < ActiveRecord::Base
     # add those Stops to ret
     ret << self.neighbor_nodes_on_foot
 
-    return ret
+    return ret.flatten
   end
 
-  def self.neighbor_nodes_on_foot(lat,lng,limit)
+  def self.neighbor_nodes_on_foot(lat,lng,limit=@@max_walk)
     stops = self.find_by_sql ['select * from stops where CalculateDistanceInMiles(?,?,stop_lat,stop_lon) < ? order by CalculateDistanceInMiles(?,?,stop_lat,stop_lon) limit 10',lat,lng,limit,lat,lng]
     ret = []
     here = GeoKit::LatLng.new(lat,lng)
