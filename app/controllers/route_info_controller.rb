@@ -18,6 +18,7 @@ class RouteInfoController < ApplicationController
     end
     respond_to do |fmt|
       fmt.json { render :layout => false, :json => @stop_times.to_json }
+      fmt.xml { render :layout => false, :xml => @stop_times.to_xml }
     end
   end
 
