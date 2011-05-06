@@ -1,3 +1,13 @@
+require 'csv'
+
+class Array
+  def strip!
+    self.each do |obj|
+      obj.strip! if obj.respond_to? :strip!
+    end
+  end
+end
+
 namespace :gtfs do
   namespace :import do
     
@@ -5,17 +15,8 @@ namespace :gtfs do
     task :trips => :environment do
       Trip.delete_all if Trip.all.any?
       print "Importing Trip records..."
-      rows = FasterCSV.read("#{RAILS_ROOT}/tmp/gtfs/trips.txt")
-      rows[1..rows.length].each do |column|
-        trip = Trip.new
-        trip.route_id = column[0]
-        trip.service_id = column[1]
-        trip.trip_id = column[2]
-        trip.trip_headsign = column[3]
-        trip.block_id = column[4]
-        trip.shape_id = column[5]
-        trip.save!
-      end
+      rows = CSV.read("#{RAILS_ROOT}/tmp/gtfs/trips.txt").strip!
+      Trip.import rows[0], rows[1, rows.count() -1], :validate => false
       puts "#{Trip.count} imported."
     end
     
@@ -23,18 +24,8 @@ namespace :gtfs do
     task :routes => :environment do
       Route.delete_all if Route.all.any?
       print "Importing Route records..."
-      rows = FasterCSV.read("#{RAILS_ROOT}/tmp/gtfs/routes.txt")
-      rows[1..rows.length].each do |column|
-        route = Route.new
-        route.route_id = column[0]
-        route.agency_id = column[1]
-        route.route_short_name = column[2]
-        route.route_long_name = column[3]
-        route.route_desc = column[4]
-        route.route_type = column[5]
-        route.route_url = column[6]
-        route.save!
-      end
+      rows = CSV.read("#{RAILS_ROOT}/tmp/gtfs/routes.txt").strip!
+      Route.import rows[0], rows[1, rows.count() -1], :validate => false
       puts "#{Route.count} imported."
     end
     
@@ -42,17 +33,8 @@ namespace :gtfs do
     task :stop_times => :environment do
       StopTime.delete_all if StopTime.all.any?
       print "Importing StopTime records..."
-      rows = FasterCSV.read("#{RAILS_ROOT}/tmp/gtfs/stop_times.txt")
-      rows[1..rows.length].each do |column|
-        stop_time = StopTime.new
-        stop_time.trip_id = column[0]
-        stop_time.arrival_time = column[1]
-        stop_time.departure_time = column[2]
-        stop_time.stop_id = column[3]
-        stop_time.stop_sequence = column[4]
-        stop_time.pickup_type = column[5]
-        stop_time.save!
-      end
+      rows = CSV.read("#{RAILS_ROOT}/tmp/gtfs/stop_times.txt").strip!
+      StopTime.import rows[0], rows[1, rows.count() -1], :validate => false
       puts "#{StopTime.count} imported."
     end
     
@@ -60,21 +42,8 @@ namespace :gtfs do
     task :stops => :environment do
       Stop.delete_all if Stop.all.any?
       print "Importing Stop records..."
-      rows = FasterCSV.read("#{RAILS_ROOT}/tmp/gtfs/stops.txt")
-      rows[1..rows.length].each do |column|
-        stop = Stop.new
-        stop.stop_id = column[0]
-        stop.stop_code = column[1]
-        stop.stop_name = column[2]
-        stop.stop_description = column[3]
-        stop.stop_lat = column[4]
-        stop.stop_lon = column[5]
-        stop.stop_zone = column[6]
-        stop.stop_url = column[7]
-        stop.stop_location_type = column[8]
-        stop.stop_parent_station = column[9]
-        stop.save!
-      end
+      rows = CSV.read("#{RAILS_ROOT}/tmp/gtfs/stops.txt").strip!
+      Stop.import rows[0], rows[1, rows.count() -1], :validate => false
       puts "#{Stop.count} imported."
     end
     
@@ -82,21 +51,8 @@ namespace :gtfs do
     task :calendars => :environment do
       Calendar.delete_all if Calendar.all.any?
       print "Importing Calendar records..."
-      calendars = FasterCSV.read("#{RAILS_ROOT}/tmp/gtfs/calendar.txt")
-      calendars[1..calendars.length].each do |column|
-        calendar = Calendar.new
-        calendar.service_id = column[0]
-        calendar.monday = column[1]
-        calendar.tuesday = column[2]
-        calendar.wednesday = column[3]
-        calendar.thursday = column[4]
-        calendar.friday = column[5]
-        calendar.saturday = column[6]
-        calendar.sunday = column[7]
-        calendar.start_date = column[8]
-        calendar.end_date = column[9]
-        calendar.save!
-      end
+      rows = CSV.read("#{RAILS_ROOT}/tmp/gtfs/calendar.txt").strip!
+      Calendar.import rows[0], rows[1, rows.count() -1], :validate => false
       puts "#{Calendar.count} imported."
     end
 
