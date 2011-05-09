@@ -44,6 +44,7 @@ class AStar
 
       i = end_points.find_index(x)
       if (i != nil)
+        @total_time = 0
         return reconstruct_path(x)
       end
       openSet.delete(x)

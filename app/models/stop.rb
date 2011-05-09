@@ -39,16 +39,35 @@ class Stop < ActiveRecord::Base
         next
       end
       stop_seq = st.stop_sequence
-      dif_time = (Time.parse(st.departure_time) - at_time)/60
+      dif_time = (Time.parse(st.departure_time) - at_time)/60.0
+      dif_time_string = ""
+      if dif_time >= 60
+        dif_time_string = (dif_time/60).floor.to_s + " hours"
+      end
+      dtm = dif_time - (dif_time / 60.0).floor * 60.0
+      if dtm >= 1
+        if dif_time_string != nil && dif_time_string.length > 0
+          dif_time_string += ", "
+        end
+        dif_time_string += dtm.floor.to_s + " minutes"
+      end
+      dtm = (dtm - dtm.floor) * 60.0
+      if dtm >= 1
+        if dif_time_string != nil && dif_time_string.length > 0
+          dif_time_string += ", "
+        end
+        dif_time_string += dtm.floor.to_s + " seconds"
+      end
       t.stop_times.each do |s|
         next if s.stop_sequence <= stop_seq
         stopcount = (s.stop_sequence - stop_seq)
         method = ""
         if dif_time > 0
-          method = "Wait " + dif_time.round(2).to_s + " minutes, then "
+          method = "Wait " + dif_time_string + ", then "
         end
-        method += "Take the " + t.route_id + " with sign "+t.trip_headsign + " " + stopcount.to_s
-        method += " stop" + ((stopcount != 1) ? "s" : "") + " to "+ s.stop.stop_name
+        method += "Take the " + t.route_id + " with sign "+t.trip_headsign 
+        method += " " + stopcount.to_s + " stop" + ((stopcount != 1) ? "s" : "")
+        method += " at "+st.arrival_time + " to "+ s.stop.stop_name
         begin
           tm = Time.parse(s.arrival_time)
         rescue Exception => e
@@ -59,7 +78,8 @@ class Stop < ActiveRecord::Base
           :Stop => s.stop,
           :Method => method,
           :Time => (tm - at_time)/60.0,
-          :StopTime => s
+          :StopTime => s,
+          :WaitTime => dif_time
         }
       end
     end
@@ -82,7 +102,8 @@ class Stop < ActiveRecord::Base
       ret << {
         :Stop => s,
         :Method => "Walk "+dist.to_s+" miles to the "+s.stop_name+" station",
-        :Time => (dist*60/2.5)
+        :Time => (dist*60/2.5),
+        :WaitTime => 0
       }
     end
     return ret

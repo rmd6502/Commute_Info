@@ -1,5 +1,7 @@
 class RouteInfoController < ApplicationController
+  include Geokit::Geocoders
   require "stop_time"
+  require "astar"
 
   def next_trains()
     routes = params[:trains]
@@ -22,8 +24,13 @@ class RouteInfoController < ApplicationController
     end
   end
 
-  def route(from_stop,to_stop,leave_time)
-    
+  def route()
+    from_point = GeoKit::Geocoders::MultiGeocoder.geocode(params[:start])
+    to_point = GeoKit::Geocoders::MultiGeocoder.geocode(params[:end])
+    @result = AStar.new.route(from_point.lat,from_point.lng,to_point.lat,to_point.lng)
+    respond_to do |fmt|
+      fmt.html
+    end
   end
 
 end
