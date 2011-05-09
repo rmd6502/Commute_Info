@@ -25,4 +25,11 @@ class StationInfoController < ApplicationController
       fmt.xml { render :layout => false, :json => @stops.to_xml }
     end
   end
+
+  def reachable_stations
+    @stops = Stop.find(params[:stop]).neighbor_nodes(Time.now)
+    respond_to do |fmt|
+      fmt.html # reachable_stations.html.erb
+    end
+  end
 end

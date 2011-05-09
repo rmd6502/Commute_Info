@@ -45,14 +45,20 @@ class Stop < ActiveRecord::Base
         stopcount = (s.stop_sequence - stop_seq)
         method = ""
         if dif_time > 0
-          method = "Wait " + dif_time.to_s + " minutes, then "
+          method = "Wait " + dif_time.round(2).to_s + " minutes, then "
         end
         method += "Take the " + t.route_id + " with sign "+t.trip_headsign + " " + stopcount.to_s
         method += " stop" + ((stopcount != 1) ? "s" : "") + " to "+ s.stop.stop_name
+        begin
+          tm = Time.parse(s.arrival_time)
+        rescue Exception => e
+          puts "Parse "+s.arrival_time+": "+e.inspect
+          tm = Time.now
+        end
         ret << {
           :Stop => s.stop,
           :Method => method,
-          :Time => Time.parse(s.arrival_time) - at_time,
+          :Time => (tm - at_time)/60.0,
           :StopTime => s
         }
       end
@@ -72,6 +78,7 @@ class Stop < ActiveRecord::Base
     stops.each do |s|
       there = GeoKit::LatLng.new(s.stop_lat, s.stop_lon)
       dist = here.distance_to(there)*1.414
+      next if dist == 0
       ret << {
         :Stop => s,
         :Method => "Walk "+dist.to_s+" miles to the "+s.stop_name+" station",
