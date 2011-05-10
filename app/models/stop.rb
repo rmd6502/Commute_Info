@@ -1,3 +1,4 @@
+require 'number_formatter'
 class Stop < ActiveRecord::Base
   set_primary_key "stop_id"
   has_many :stop_times 
@@ -39,25 +40,8 @@ class Stop < ActiveRecord::Base
         next
       end
       stop_seq = st.stop_sequence
-      dif_time = (Time.parse(st.departure_time) - at_time)/60.0
-      dif_time_string = ""
-      if dif_time >= 60
-        dif_time_string = (dif_time/60).floor.to_s + " hours"
-      end
-      dtm = dif_time - (dif_time / 60.0).floor * 60.0
-      if dtm >= 1
-        if dif_time_string != nil && dif_time_string.length > 0
-          dif_time_string += ", "
-        end
-        dif_time_string += dtm.floor.to_s + " minutes"
-      end
-      dtm = (dtm - dtm.floor) * 60.0
-      if dtm >= 1
-        if dif_time_string != nil && dif_time_string.length > 0
-          dif_time_string += ", "
-        end
-        dif_time_string += dtm.floor.to_s + " seconds"
-      end
+      dif_time = Time.parse(st.departure_time) - at_time
+      dif_time_string = dif_time.format_as_time
       t.stop_times.each do |s|
         next if s.stop_sequence <= stop_seq
         stopcount = (s.stop_sequence - stop_seq)
@@ -79,7 +63,7 @@ class Stop < ActiveRecord::Base
           :Method => method,
           :Time => (tm - at_time)/60.0,
           :StopTime => s,
-          :WaitTime => dif_time
+          :WaitTime => dif_time/60.0
         }
       end
     end
@@ -101,7 +85,7 @@ class Stop < ActiveRecord::Base
       next if dist == 0
       ret << {
         :Stop => s,
-        :Method => "Walk "+dist.to_s+" miles to the "+s.stop_name+" station",
+        :Method => "Walk "+dist.round(3).to_s+" miles to the "+s.stop_name+" station",
         :Time => (dist*60/2.5),
         :WaitTime => 0
       }

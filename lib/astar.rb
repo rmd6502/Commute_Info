@@ -10,6 +10,22 @@ class AStar
     end
   end
 
+  def score(node)
+    base_t = node[:Time]
+    # waiting has a 50% penalty
+    if node.has_key? :WaitTime
+      base_t += node[:WaitTime]/2
+    end
+    # transferring has a 10% penalty
+    if node.has_key? :StopTime
+      base_t += (node[:Time] - node[:WaitTime])*0.1
+    else
+      # walking has a 30% penalty
+      base_t += (node[:Time]) * 0.3
+    end
+    return base_t
+  end
+
   def route(from_lat,from_lon,to_lat,to_lon)
     closedSet = Set.new()
     start_points = Stop.neighbor_nodes_on_foot(from_lat,from_lon,1.0)
@@ -24,7 +40,7 @@ class AStar
     start_points.each do |spn|
       sp = spn[:Stop]
       here = GeoKit::LatLng.new(sp.stop_lat, sp.stop_lon)
-      g_score[sp] = spn[:Time]
+      g_score[sp] = score(spn)
 	  # assume average 7MPH for heuristic, and turn to minutes
       h_score[sp] = spn[:Time] + 60.0 * here.distance_to(there) / AVERAGE_SPEED
       f_score[sp] = h_score[sp]
@@ -50,7 +66,7 @@ class AStar
       openSet.delete(x)
       closedSet.add(x)
 
-      #puts "\n\nStop "+x.inspect
+      #puts "\n\nStop "+x.inspect+"\n\n"
       nodelist = x.neighbor_nodes(at_time+g_score[x].minutes)
       #puts "\nNodelist "+nodelist.inspect
       nodelist.each do |node|
@@ -59,7 +75,7 @@ class AStar
         next if closedSet.find_index(node_stop) != nil
 
 		# add a 5 minute penalty for transferring
-        tentative_g_score = g_score[x] + node[:Time] + 5
+        tentative_g_score = g_score[x] + score(node)
         if openSet.find_index(node_stop) == nil
           openSet.add node_stop
           tentative_better = true
