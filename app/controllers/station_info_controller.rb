@@ -27,6 +27,7 @@ class StationInfoController < ApplicationController
     respond_to do |fmt|
       fmt.json { render :layout => false, :json => @stops.to_json }
       fmt.xml { render :layout => false, :json => @stops.to_xml }
+      fmt.html
     end
   end
 

@@ -1,5 +1,5 @@
 class AStar
-  AVERAGE_SPEED = 7.0
+  AVERAGE_SPEED = 13.5
   def reconstruct_path(node)
     if @came_from.has_key? node
       return reconstruct_path(@came_from[node]) << @methods[node]
@@ -12,9 +12,9 @@ class AStar
 
   def score(node)
     base_t = node[:Time]
-    # waiting has a 50% penalty
+    # waiting has a 20% penalty
     if node.has_key? :WaitTime
-      base_t += node[:WaitTime]/2
+      base_t += node[:WaitTime] * 0.2
     end
     # transferring has a 10% penalty
     if node.has_key? :StopTime
@@ -89,7 +89,9 @@ class AStar
           here = GeoKit::LatLng.new(node_stop.stop_lat, node_stop.stop_lon)
           @came_from[node_stop] = x
           g_score[node_stop] = tentative_g_score
-          h_score[node_stop] = 60.0 * here.distance_to(there) * 1.414 / AVERAGE_SPEED
+          phi = here.heading_to(there)
+          ratio = Math::sin(phi.radians).abs + Math::cos(phi.radians).abs
+          h_score[node_stop] = 60.0 * here.distance_to(there) * ratio / AVERAGE_SPEED
           f_score[node_stop] = g_score[node_stop] + h_score[node_stop]
           @methods[node_stop] = node
         end
