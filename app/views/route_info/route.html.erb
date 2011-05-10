@@ -1,0 +1,16 @@
+<% require 'number_formatter' %>
+<table>
+  <tr>
+    <th>Instruction</th>
+    <th>Time</th>
+    <th>Total Time</th>
+  </tr>
+
+<% total_time = 0 %>
+<% @result.each do |result| %>
+  <tr>
+    <% total_time += 60*result[:Time] %>
+    <td><%= result[:Method] %></td><td><%= (60*result[:Time]).format_as_time %></td><td><%= total_time.format_as_time %></td>
+  </tr>
+<% end %>
+</table>

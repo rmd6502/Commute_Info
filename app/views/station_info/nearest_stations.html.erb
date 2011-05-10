@@ -1,0 +1,17 @@
+<% require 'number_formatter' %>
+<table>
+  <tr>
+    <th>Stop</th>
+    <th>Distance</th>
+    <th>Manhattan Distance</th>
+  </tr>
+
+<% @stops.each do |stop| %>
+<% to_point = GeoKit::LatLng.new(stop.stop_lat, stop.stop_lon) %>
+<% phi = @from_point.heading_to(to_point) %>
+<% ratio = Math::sin(phi.radians).abs + Math::cos(phi.radians).abs %>
+  <tr>
+    <td><%= stop.stop_id %>/<%= stop.stop_name %></td><td><%= @from_point.distance_to(to_point) %></td><td><%= @from_point.distance_to(to_point) * ratio %></td>
+  </tr>
+<% end %>
+</table>

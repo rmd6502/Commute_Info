@@ -1,0 +1,13 @@
+<table>
+  <tr>
+    <th>Stop</th>
+    <th>Method</th>
+    <th>Time</th>
+  </tr>
+
+<% @stops.each do |stop| %>
+  <tr>
+    <td><%= stop[:Stop].stop_name %></td><td><%= stop[:Method]%></td><td><%= stop[:Time] %></td>
+  </tr>
+<% end %>
+</table>

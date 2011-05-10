@@ -1,0 +1,12 @@
+<table>
+  <tr>
+    <th>Stop ID</th>
+    <th>Stop Name</th>
+  </tr>
+
+<% @stops.each do |stop| %>
+  <tr>
+    <td><%= stop.stop_id %></td><td><%= stop.stop_name %></td>
+  </tr>
+<% end %>
+</table>
