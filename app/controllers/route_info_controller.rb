@@ -25,6 +25,7 @@ class RouteInfoController < ApplicationController
   end
 
   def route()
+    @result = nil
     from_point = GeoKit::Geocoders::MultiGeocoder.geocode(params[:start])
     to_point = GeoKit::Geocoders::MultiGeocoder.geocode(params[:end])
     @result = AStar.new.route(from_point.lat,from_point.lng,to_point.lat,to_point.lng)

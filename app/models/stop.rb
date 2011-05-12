@@ -1,7 +1,8 @@
 require 'number_formatter'
+require 'rbtree'
 class Stop < ActiveRecord::Base
   set_primary_key "stop_id"
-  has_many :stop_times 
+  has_many :stop_times , :include => :trip
   has_and_belongs_to_many :trips, :join_table => 'stop_times'
 
   # Most people are willing to walk a max of 1/4 mile.
@@ -19,7 +20,7 @@ class Stop < ActiveRecord::Base
     # Checks calendars for trip availability, and finds the next time after at_time that 
     # is leaving, so it can add wait time to the :Method as well as to the cost
 
-    ret = []
+    ret = MultiRBTree.new
     # get trip_id from the stop_time if it was passed in
     # find StopTimes (optional:with a different trip_id) at the same stop_id with departure_times after at_time
     # Cull the list of StopTimes: 
@@ -28,12 +29,17 @@ class Stop < ActiveRecord::Base
     #   2.  remove duplicate route_ids.  A possible exception is if departure_time < 2mins after at_time, since they may miss that
     #       connection.
     #   3.  If two StopTime records get you to the same stop, only keep the shortest time
-    trips = Trip.trips_between_at_stop(self.stop_id,at_time,at_time + 1.hour,50).uniq { |t|
+    trips = Trip.trips_between_at_stop(self.stop_id,at_time,at_time + 1.hour,20).uniq { |t|
       t.route_id + t.trip_headsign
     }
 
     # add the corresponding Stops to ret
+    # But only if we don't already have them.
+    stop_set = Set.new
+    trip_set = Set.new
     trips.each do |t|
+      next if trip_set.include? t.route_id + t.trip_headsign
+      trip_set.add t.route_id + t.trip_headsign
       st = t.stop_time_for_stop(self,at_time)
       if st == nil
         puts "\nno stop time for trip "+t.inspect+" stop "+self.inspect+"\n\n"
@@ -44,6 +50,7 @@ class Stop < ActiveRecord::Base
       dif_time_string = dif_time.format_as_time
       t.stop_times.each do |s|
         next if s.stop_sequence <= stop_seq
+        next if stop_set.include? s.stop
         stopcount = (s.stop_sequence - stop_seq)
         method = ""
         if dif_time > 0
@@ -58,42 +65,47 @@ class Stop < ActiveRecord::Base
           puts "Parse "+s.arrival_time+": "+e.inspect
           tm = Time.now
         end
-        ret << {
+        stop_set.add s.stop
+        ret[tm-at_time] = {
           :Stop => s.stop,
           :Method => method,
-          :Time => (tm - at_time)/60.0,
+          :Time => (tm - at_time),
           :StopTime => s,
-          :WaitTime => dif_time/60.0
+          :WaitTime => dif_time
         }
       end
     end
 
     # take the lat/lng of the stop and search up to @@max_walk away for other stops.
     # add those Stops to ret
-    ret << self.neighbor_nodes_on_foot
+    self.neighbor_nodes_on_foot(3).each { |kv| ret[kv[0]] = kv[1] }
 
-    return ret.flatten
+    return ret
   end
 
-  def self.neighbor_nodes_on_foot(lat,lng,limit=@@max_walk)
-    stops = self.find_by_sql ['select * from stops where CalculateDistanceInMiles(?,?,stop_lat,stop_lon) < ? order by CalculateDistanceInMiles(?,?,stop_lat,stop_lon) limit 10',lat,lng,limit,lat,lng]
-    ret = []
+  def self.neighbor_nodes_on_foot(lat,lng,maxCount=5,limit=@@max_walk)
+    stops = self.find_by_sql ['select * from stops where CalculateDistanceInMiles(?,?,stop_lat,stop_lon) < ? order by CalculateDistanceInMiles(?,?,stop_lat,stop_lon) limit ?',lat,lng,limit,lat,lng,maxCount]
+    ret = MultiRBTree.new
     here = GeoKit::LatLng.new(lat,lng)
     stops.each do |s|
       there = GeoKit::LatLng.new(s.stop_lat, s.stop_lon)
-      dist = here.distance_to(there)*1.414
+      dist = here.distance_to(there)
       next if dist == 0
-      ret << {
+      phi = here.heading_to(there)
+      ratio = Math::sin(phi.radians).abs + Math::cos(phi.radians).abs
+      dist *= ratio
+      tm = (dist*3600/2.5)
+      ret[tm] = {
         :Stop => s,
         :Method => "Walk "+dist.round(3).to_s+" miles to the "+s.stop_name+" station",
-        :Time => (dist*60/2.5),
+        :Time => tm,
         :WaitTime => 0
       }
     end
     return ret
   end
 
-  def neighbor_nodes_on_foot(limit=@@max_walk)
-    return Stop.neighbor_nodes_on_foot(self.stop_lat, self.stop_lon,limit)
+  def neighbor_nodes_on_foot(max=5,limit=@@max_walk)
+    return Stop.neighbor_nodes_on_foot(self.stop_lat, self.stop_lon,max,limit)
   end
 end

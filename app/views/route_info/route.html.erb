@@ -9,8 +9,8 @@
 <% total_time = 0 %>
 <% @result.each do |result| %>
   <tr>
-    <% total_time += 60*result[:Time] %>
-    <td><%= result[:Method] %></td><td><%= (60*result[:Time]).format_as_time %></td><td><%= total_time.format_as_time %></td>
+    <% total_time += result[:Time] %>
+    <td><%= result[:Method] %></td><td><%= result[:Time].format_as_time %></td><td><%= total_time.format_as_time %></td>
   </tr>
 <% end %>
 </table>

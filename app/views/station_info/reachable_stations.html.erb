@@ -1,3 +1,4 @@
+<% require 'number_formatter' %>
 <table>
   <tr>
     <th>Stop</th>
@@ -7,7 +8,7 @@
 
 <% @stops.each do |stop| %>
   <tr>
-    <td><%= stop[:Stop].stop_name %></td><td><%= stop[:Method]%></td><td><%= stop[:Time] %></td>
+    <td><%= stop[:Stop].stop_name %></td><td><%= stop[:Method]%></td><td><%= stop[:Time].format_as_time %></td>
   </tr>
 <% end %>
 </table>

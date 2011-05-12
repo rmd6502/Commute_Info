@@ -12,6 +12,7 @@ gem 'shoulda'
 gem 'paperclip'
 gem 'geokit'
 gem 'activerecord-import'
+gem 'rbtree'
 
 # Use unicorn as the web server
 # gem 'unicorn'
