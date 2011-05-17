@@ -6,6 +6,8 @@ This is a Rails project to attempt to do something useful with GTFS data.  The q
 Routing is done with a messy A* algorithm.  I suspect most of the problem is due to my data structures imposing higher big-O on my access to frequently 
 needed data.
 
+The GTFS Spec is at http://code.google.com/transit/spec/transit_feed_specification.html#stops_txt___Field_Definitions
+
 It's based on Andy Atkinson's gtfs-helper project, but I rewrote it sufficiently that I decided not to fork, but just start over.  He's at 
 https://github.com/andyatkinson
 
