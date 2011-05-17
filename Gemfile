@@ -1,4 +1,5 @@
 source 'http://rubygems.org'
+source 'http://gems.github.com'
 
 gem 'rails', '3.0.7'
 
@@ -13,6 +14,8 @@ gem 'paperclip'
 gem 'geokit'
 gem 'activerecord-import'
 gem 'rbtree'
+
+gem 'aub-record_filter'
 
 # Use unicorn as the web server
 # gem 'unicorn'

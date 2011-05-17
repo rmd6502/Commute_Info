@@ -13,7 +13,7 @@ class StationInfoController < ApplicationController
     else
       limit = 5
     end
-    @stops = Stop.find_by_sql ['select * from stops where CalculateDistanceInMiles(?,?,stop_lat,stop_lon) < ? order by CalculateDistanceInMiles(?,?,stop_lat,stop_lon)',from_point.lat,from_point.lng,limit,from_point.lat,from_point.lng]
+    @stops = Stop.neighbor_nodes_on_foot(@from_point.lat,@from_point.lng,20,limit).collect {|s| s[:Stop] }
     respond_to do |fmt|
       fmt.json { render :layout => false, :json => @stops.to_json }
       fmt.xml { render :layout => false, :xml => @stops.to_xml }
