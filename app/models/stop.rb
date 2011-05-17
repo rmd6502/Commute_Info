@@ -1,13 +1,17 @@
 require 'number_formatter'
 require 'rbtree'
+
+# A Stop is a station where one or more Routes intersect
 class Stop < ActiveRecord::Base
   set_primary_key "stop_id"
-  has_many :stop_times , :include => :trip
-  has_and_belongs_to_many :trips, :join_table => 'stop_times'
+  has_many :stop_times , :include => :trip, :order => :departure_time
+  has_and_belongs_to_many :trips, :join_table => 'stop_times', :order => :departure_time
 
   # Most people are willing to walk a max of 1/4 mile.
   @@max_walk = 0.25
 
+  # Return the stops directly reachable from this stop at a given time.  See the comments in the function
+  # for details on what is returned.
   def neighbor_nodes(at_time,stop_time = nil)
     # There are two types of neighbor nodes: 
     #   * nodes reachable from trains in the same station 
@@ -108,4 +112,9 @@ class Stop < ActiveRecord::Base
   def neighbor_nodes_on_foot(max=5,limit=@@max_walk)
     return Stop.neighbor_nodes_on_foot(self.stop_lat, self.stop_lon,max,limit)
   end
+  
+  def routes_at_stop
+    self.trips.collect { |t| t.route_id }.uniq
+  end
+  
 end

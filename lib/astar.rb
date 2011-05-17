@@ -1,4 +1,6 @@
 require 'rbtree'
+
+# Performs A* routing
 class AStar
   AVERAGE_SPEED = 13.5
   def reconstruct_path(node)
@@ -11,11 +13,12 @@ class AStar
     end
   end
 
+  # The nominal score of a particular route.  Takes into effect travel time, wait time, and whether you rode or walked
   def score(node)
     base_t = node[:Time]
-    # waiting has a 20% penalty
+    # waiting has a 10% penalty
     if node.has_key? :WaitTime
-      base_t += node[:WaitTime] * 0.2
+      base_t += node[:WaitTime] * 0.1
     end
     # transferring has a 10% penalty
     if node.has_key? :StopTime
@@ -27,6 +30,7 @@ class AStar
     return base_t
   end
 
+  # The raison d'etre for this class
   def route(from_lat,from_lon,to_lat,to_lon,at_time=Time.now)
     closedSet = Set.new
     start_points = Stop.neighbor_nodes_on_foot(from_lat,from_lon,3,1.0)
@@ -38,19 +42,17 @@ class AStar
     g_score = Hash.new
     h_score = Hash.new
     @methods = Hash.new
-    puts "start_points #{start_points.inspect} closedSet #{closedSet}"
+
     start_points.each do |spnval|
       spn = spnval[1]
       sp = spn[:Stop]
       here = GeoKit::LatLng.new(sp.stop_lat, sp.stop_lon)
       sc = score(spn)
       g_score[sp] = sc
-	  # assume average 7MPH for heuristic, and turn to minutes
       hsc = spn[:Time] + 3600.0 * here.distance_to(there) / AVERAGE_SPEED
       h_score[sp] = hsc
       sc += hsc
       f_score[sc] = sp
-      #f_score << { :score => h_score[sp], :sp => sp, :stop_time => nil }
       @methods[sp] = spn
     end
 
@@ -63,14 +65,29 @@ class AStar
       if end_points.include? x
         @total_time = 0
         puts "found a route"
-        return reconstruct_path(x)
+        ret = reconstruct_path(x)
+        here = GeoKit::LatLng.new(x.stop_lat, x.stop_lon) 
+        dist = here.distance_to(there)
+        if dist > 0
+          phi = here.heading_to(there)
+          ratio = Math::sin(phi.radians).abs + Math::cos(phi.radians).abs
+          dist *= ratio
+          tm = (dist*3600/2.5)
+          ret << {
+            :Stop => nil,
+            :WaitTime => 0,
+            :Time => tm,
+            :Method => "Walk #{dist.round(2)} miles to your destination"
+          }
+        end
+        return ret
       end
       openSet.delete(x)
       closedSet.add(x)
 
       puts "\n\nStop "+x.stop_name+"("+x.stop_id+")\n\n"
       nodelist = x.neighbor_nodes(at_time+g_score[x])
-      #puts "\nNodelist "+nodelist.inspect
+      puts "\nNodelist "+nodelist.count.to_s
       count = 0
       nodelist.each do |nodevalue|
         node = nodevalue[1]
