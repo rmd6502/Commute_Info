@@ -45,7 +45,7 @@ class Stop < ActiveRecord::Base
     trips.each do |t|
       next if trip_set.include? t.route_id + t.trip_headsign
       trip_set.add t.route_id + t.trip_headsign
-      st = t.stop_time_for_stop(self,at_time)
+      st = t.stop_time_for_stop(self)
       if st == nil
         puts "\nno stop time for trip "+t.inspect+" stop "+self.inspect+"\n\n"
         next

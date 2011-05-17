@@ -20,13 +20,15 @@ class AStar
     if node.has_key? :WaitTime
       base_t += node[:WaitTime] * 0.1
     end
-    # transferring has a 10% penalty
+    # transferring has a 20% penalty
     if node.has_key? :StopTime
-      base_t += (node[:Time] - node[:WaitTime])*0.1
+      base_t += (node[:Time] - node[:WaitTime])*0.2
     else
       # walking has a 40% penalty
       base_t += (node[:Time]) * 0.4
     end
+    
+    #puts "Node: #{node} score #{base_t}"
     return base_t
   end
 
@@ -34,7 +36,7 @@ class AStar
   def route(from_lat,from_lon,to_lat,to_lon,at_time=Time.now)
     closedSet = Set.new
     start_points = Stop.neighbor_nodes_on_foot(from_lat,from_lon,3,1.0)
-    end_points = Set.new(Stop.neighbor_nodes_on_foot(to_lat,to_lon,2,1.0).collect {|n| n[1][:Stop]})
+    end_points = Set.new(Stop.neighbor_nodes_on_foot(to_lat,to_lon,2,1.0).collect {|n| n[1][:Stop].stop_id})
     openSet = Set.new(start_points.collect{|n| n[1][:Stop]})
     @came_from = Hash.new
     there = GeoKit::LatLng.new(to_lat, to_lon)
@@ -62,7 +64,7 @@ class AStar
         x = fkv[1]
         break if openSet.include? x
       end
-      if end_points.include? x
+      if end_points.include? x.stop_id
         @total_time = 0
         puts "found a route"
         ret = reconstruct_path(x)
@@ -85,17 +87,18 @@ class AStar
       openSet.delete(x)
       closedSet.add(x)
 
-      puts "\n\nStop "+x.stop_name+"("+x.stop_id+")\n\n"
+      #puts "\n\nStop "+x.stop_name+"("+x.stop_id+")\n\nend_points #{end_points.inspect}\n\n"
       nodelist = x.neighbor_nodes(at_time+g_score[x])
-      puts "\nNodelist "+nodelist.count.to_s
+      #puts "\nNodelist "+nodelist.count.to_s
       count = 0
       nodelist.each do |nodevalue|
         node = nodevalue[1]
         #puts "Node "+node.inspect
         node_stop = node[:Stop]
         next if closedSet.find_index(node_stop) != nil
+        tsc = score(node)
 
-        tentative_g_score = g_score[x] + score(node)
+        tentative_g_score = g_score[x] + tsc
         if openSet.find_index(node_stop) == nil
           openSet.add node_stop
           tentative_better = true
@@ -120,7 +123,7 @@ class AStar
           count = count + 1
         end
       end
-      puts "evaluated #{count} stops"
+      #puts "evaluated #{count} stops"
     end
     puts "No route found :-("
     return nil
