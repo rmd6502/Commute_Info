@@ -41,6 +41,7 @@ class Stop < ActiveRecord::Base
     # But only if we don't already have them.
     stop_set = Set.new
     trip_set = Set.new
+    dt = Time.new(2000,1,1,0,0,0,"+00:00") + (at_time - at_time.beginning_of_day)
     trips.each do |t|
       next if trip_set.include? t.route_id + t.trip_headsign
       trip_set.add t.route_id + t.trip_headsign
@@ -50,7 +51,7 @@ class Stop < ActiveRecord::Base
         next
       end
       stop_seq = st.stop_sequence
-      dif_time = Time.parse(st.departure_time) - at_time
+      dif_time = (st.departure_time - dt).to_f
       dif_time_string = dif_time.format_as_time
       t.stop_times.each do |s|
         next if s.stop_sequence <= stop_seq
@@ -62,18 +63,18 @@ class Stop < ActiveRecord::Base
         end
         method += "Take the " + t.route_id + " with sign "+t.trip_headsign 
         method += " " + stopcount.to_s + " stop" + ((stopcount != 1) ? "s" : "")
-        method += " at "+st.arrival_time + " to "+ s.stop.stop_name
+        method += " at "+st.arrival_time.strftime("%H:%M:%S") + " to "+ s.stop.stop_name
         begin
-          tm = Time.parse(s.arrival_time)
+          tm = s.arrival_time - dt
         rescue Exception => e
           puts "Parse "+s.arrival_time+": "+e.inspect
-          tm = Time.now
+          tm = dt
         end
         stop_set.add s.stop
-        ret[tm-at_time] = {
+        ret[tm] = {
           :Stop => s.stop,
           :Method => method,
-          :Time => (tm - at_time),
+          :Time => tm,
           :StopTime => s,
           :WaitTime => dif_time
         }
