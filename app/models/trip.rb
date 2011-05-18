@@ -25,11 +25,9 @@ class Trip < ActiveRecord::Base
 
   # Retrieve the stop_time records for a given stop, after a given time
   def stop_time_for_stop(stop)
-    ret = stop_times.filter do 
-      with(:stop_id).equal_to(stop)
-    end
-    return ret.count ? ret[0] : nil
-    #return self.stop_times.find(:first, :conditions => ["stop_id = ? and departure_time > ?", stop.stop_id, at_time.strftime("%H:%M:%S")])
+    ret = stop_times.find_by_stop_id(stop)
+
+    return ret
   end
 
 end

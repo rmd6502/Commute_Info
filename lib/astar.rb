@@ -4,11 +4,11 @@ require 'rbtree'
 class AStar
   AVERAGE_SPEED = 13.5
   def reconstruct_path(node)
-    if @came_from.has_key? node
-      return reconstruct_path(@came_from[node]) << @methods[node]
+    if @came_from.has_key? node.stop_id
+      return reconstruct_path(@came_from[node.stop_id]) << @methods[node.stop_id]
     else
       ret = []
-      ret << @methods[node]
+      ret << @methods[node.stop_id]
       return ret;
     end
   end
@@ -50,12 +50,12 @@ class AStar
       sp = spn[:Stop]
       here = GeoKit::LatLng.new(sp.stop_lat, sp.stop_lon)
       sc = score(spn)
-      g_score[sp] = sc
+      g_score[sp.stop_id] = sc
       hsc = spn[:Time] + 3600.0 * here.distance_to(there) / AVERAGE_SPEED
-      h_score[sp] = hsc
+      h_score[sp.stop_id] = hsc
       sc += hsc
       f_score[sc] = sp
-      @methods[sp] = spn
+      @methods[sp.stop_id] = spn
     end
 
     while openSet.length > 0
@@ -88,7 +88,7 @@ class AStar
       closedSet.add(x)
 
       #puts "\n\nStop "+x.stop_name+"("+x.stop_id+")\n\nend_points #{end_points.inspect}\n\n"
-      nodelist = x.neighbor_nodes(at_time+g_score[x])
+      nodelist = x.neighbor_nodes(at_time+g_score[x.stop_id])
       #puts "\nNodelist "+nodelist.count.to_s
       count = 0
       nodelist.each do |nodevalue|
@@ -98,11 +98,11 @@ class AStar
         next if closedSet.find_index(node_stop) != nil
         tsc = score(node)
 
-        tentative_g_score = g_score[x] + tsc
+        tentative_g_score = g_score[x.stop_id] + tsc
         if openSet.find_index(node_stop) == nil
           openSet.add node_stop
           tentative_better = true
-        elsif tentative_g_score < g_score[node_stop]
+        elsif tentative_g_score < g_score[node_stop.stop_id]
           tentative_better = true
         else
           tentative_better = false
@@ -110,16 +110,16 @@ class AStar
 
         if tentative_better
           here = GeoKit::LatLng.new(node_stop.stop_lat, node_stop.stop_lon)
-          @came_from[node_stop] = x
+          @came_from[node_stop.stop_id] = x
           sc = tentative_g_score
-          g_score[node_stop] = sc
+          g_score[node_stop.stop_id] = sc
           phi = here.heading_to(there)
           ratio = Math::sin(phi.radians).abs + Math::cos(phi.radians).abs
           hsc = 3600.0 * here.distance_to(there) * ratio / AVERAGE_SPEED
           sc += hsc
-          h_score[node_stop] = hsc
+          h_score[node_stop.stop_id] = hsc
           f_score[sc] = node_stop
-          @methods[node_stop] = node
+          @methods[node_stop.stop_id] = node
           count = count + 1
         end
       end
