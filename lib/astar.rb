@@ -2,7 +2,7 @@ require 'rbtree'
 
 # Performs A* routing
 class AStar
-  AVERAGE_SPEED = 13.5
+  AVERAGE_SPEED = 14.5
   def reconstruct_path(node)
     if @came_from.has_key? node.stop_id
       return reconstruct_path(@came_from[node.stop_id]) << @methods[node.stop_id]
