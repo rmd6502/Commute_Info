@@ -94,13 +94,14 @@ class AStar
       count = 0
       nodelist.each do |nodevalue|
         node = nodevalue[1]
-        puts "Node "+node.inspect
+        #puts "Node "+node.inspect
         node_stop = node[:Stop]
         next if closedSet.include? node_stop.stop_id
         tsc = score(node)
 
         tentative_g_score = g_score[x.stop_id] + tsc
         if !openSet.include? node_stop.stop_id
+          puts "    adding #{node_stop.stop_name} (#{node_stop.stop_id}) score #{tentative_g_score} to open set"
           openSet.add node_stop.stop_id
           tentative_better = true
         elsif tentative_g_score < g_score[node_stop.stop_id]
