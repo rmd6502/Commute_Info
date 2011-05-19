@@ -37,7 +37,8 @@ class AStar
     closedSet = Set.new
     start_points = Stop.neighbor_nodes_on_foot(from_lat,from_lon,3,1.0)
     end_points = Set.new(Stop.neighbor_nodes_on_foot(to_lat,to_lon,2,1.0).collect {|n| n[1][:Stop].stop_id})
-    openSet = Set.new(start_points.collect{|n| n[1][:Stop]})
+    openSet = Set.new( start_points.collect { |n| n[1][:Stop].stop_id })
+ 
     @came_from = Hash.new
     there = GeoKit::LatLng.new(to_lat, to_lon)
     f_score = MultiRBTree.new
@@ -62,7 +63,7 @@ class AStar
       x = nil
       f_score.each do |fkv|
         x = fkv[1]
-        break if openSet.include? x
+        break if openSet.include? x.stop_id
       end
       if end_points.include? x.stop_id
         @total_time = 0
@@ -84,23 +85,23 @@ class AStar
         end
         return ret
       end
-      openSet.delete(x)
-      closedSet.add(x)
+      openSet.delete(x.stop_id)
+      closedSet.add(x.stop_id)
 
-      #puts "\n\nStop "+x.stop_name+"("+x.stop_id+")\n\nend_points #{end_points.inspect}\n\n"
+      puts "\n\nStop "+x.stop_name+"("+x.stop_id+")\n\n"
       nodelist = x.neighbor_nodes(at_time+g_score[x.stop_id])
       #puts "\nNodelist "+nodelist.count.to_s
       count = 0
       nodelist.each do |nodevalue|
         node = nodevalue[1]
-        #puts "Node "+node.inspect
+        puts "Node "+node.inspect
         node_stop = node[:Stop]
-        next if closedSet.find_index(node_stop) != nil
+        next if closedSet.include? node_stop.stop_id
         tsc = score(node)
 
         tentative_g_score = g_score[x.stop_id] + tsc
-        if openSet.find_index(node_stop) == nil
-          openSet.add node_stop
+        if !openSet.include? node_stop.stop_id
+          openSet.add node_stop.stop_id
           tentative_better = true
         elsif tentative_g_score < g_score[node_stop.stop_id]
           tentative_better = true
@@ -123,7 +124,7 @@ class AStar
           count = count + 1
         end
       end
-      #puts "evaluated #{count} stops"
+      puts "evaluated #{count} stops"
     end
     puts "No route found :-("
     return nil
