@@ -5,7 +5,7 @@ require 'rbtree'
 class Stop < ActiveRecord::Base
   set_primary_key "stop_id"
   has_many :stop_times , :include => :trip, :order => :departure_time
-  has_and_belongs_to_many :trips, :join_table => 'stop_times', :order => :departure_time
+  has_many :trips, :through => :stop_times, :order => :departure_time
 
   # Most people are willing to walk a max of 1/4 mile.
   @@max_walk = 0.25
@@ -114,8 +114,25 @@ class Stop < ActiveRecord::Base
     return Stop.neighbor_nodes_on_foot(self.stop_lat, self.stop_lon,max,limit)
   end
   
+  @@all_stops_ = []
+  # Returns a list of all stops in the system
+  def self.all_stops
+    if @@all_stops_.present?
+      puts "have all_stops"
+    else
+      temp = self.find(:all, :order => 'stop_name')
+      temp.each do |st|
+        rs = st.routes_at_stop.join(",")
+        st.stop_name += " ("+rs+")"
+      end
+      @@all_stops_ = temp
+    end
+    
+    return @@all_stops_
+  end
+  
   def routes_at_stop
-    self.trips.collect { |t| t.route_id }.uniq
+    self.trips.collect { |t| t.route_id }.uniq.sort
   end
   
 end

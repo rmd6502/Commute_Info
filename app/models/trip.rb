@@ -4,7 +4,7 @@ class Trip < ActiveRecord::Base
   set_primary_key "trip_id"
   belongs_to :route
   has_many :calendars, :foreign_key => :service_id, :primary_key => :service_id
-  has_and_belongs_to_many :stops, :join_table => 'stop_times', :order => "departure_time"
+  has_many :stops, :through => :stop_times, :order => "departure_time"
   has_many :stop_times, :order => "departure_time"
   
   named_filter :trips_for_routes do |routes,stops,at_time,until_time|

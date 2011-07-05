@@ -1,7 +1,7 @@
 # StopTime records indicate when a particular trip is at a particular stop.
 require 'record_filter'
 class StopTime < ActiveRecord::Base
-  belongs_to :trip, :include => :stops
+  belongs_to :trip
   belongs_to :stop
   
   named_filter(:next_stop_times) do |stops,at_time,until_time|

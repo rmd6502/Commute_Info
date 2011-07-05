@@ -6,6 +6,19 @@ class RouteInfoController < ApplicationController
   def next_trains()
     routes = params[:trains]
     stops = params[:stops]
+
+    if routes == nil
+      flash[:notice] << "need 'trains' parameter"
+    end
+
+    if stops == nil
+      flash[:notice] << "need 'stops' parameter"
+    end
+
+    if routes == nil or stops == nil
+      redirect_to :action => 'error'
+    end
+
     if params.has_key? :limit
       limit = params[:limit]
     else
@@ -38,6 +51,12 @@ class RouteInfoController < ApplicationController
     @result = AStar.new.route(from_point.lat,from_point.lng,to_point.lat,to_point.lng)
     respond_to do |fmt|
       fmt.html
+    end
+  end
+
+  def error()
+    respond_to do |fmt|
+       fmt.html
     end
   end
 

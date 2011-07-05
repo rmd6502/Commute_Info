@@ -16,6 +16,8 @@ gem 'activerecord-import'
 gem 'rbtree'
 
 gem 'aub-record_filter'
+gem 'ruby-debug-base19', "0.11.24"
+gem 'ruby-debug19', "0.11.6"
 
 # Use unicorn as the web server
 # gem 'unicorn'

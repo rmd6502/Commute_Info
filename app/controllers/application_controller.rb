@@ -7,4 +7,13 @@ class ApplicationController < ActionController::Base
 
   # Scrub sensitive parameters from your log
   # filter_parameter_logging :password
+  
+  # Entry point for the app
+  def index
+    @stop_list = Stop.all_stops
+    respond_to do |fmt|
+      fmt.html
+    end
+  end
+  
 end
