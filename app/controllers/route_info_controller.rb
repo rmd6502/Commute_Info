@@ -7,15 +7,8 @@ class RouteInfoController < ApplicationController
     routes = params[:trains]
     stops = params[:stops]
 
-    if routes == nil
-      flash[:notice] << "need 'trains' parameter"
-    end
-
     if stops == nil
       flash[:notice] << "need 'stops' parameter"
-    end
-
-    if routes == nil or stops == nil
       redirect_to :action => 'error'
     end
 
@@ -32,7 +25,11 @@ class RouteInfoController < ApplicationController
     
     @stop_times = []
     routes.each do |r|
-      trips = StopTime.find_by_sql ['select * from stop_times where stop_id in (?) and departure_time >= ? and trip_id in (select trip_id from trips where route_id in (?)) limit ?',stops, Time.now.strftime('%H:%M:%S'), routes, limit]
+      if routes.present?
+        trips = StopTime.find_by_sql ['select * from stop_times where stop_id in (?) and departure_time >= ? and trip_id in (select trip_id from trips where route_id in (?)) limit ?',stops, Time.now.strftime('%H:%M:%S'), routes, limit]
+      else
+        trips = StopTime.find_by_sql ['select * from stop_times where stop_id in (?) and departure_time >= ?) limit ?',stops, Time.now.strftime('%H:%M:%S'), limit]
+      end
       #trips = StopTime.where(:stop_id => stops).where(['departure_time >= ?', at_time.strftime('%H:%M:%S')]).where(:route_id => routes).limit(limit)
       trips.each do |t|
         @stop_times << { :route => r, :time => t.departure_time }

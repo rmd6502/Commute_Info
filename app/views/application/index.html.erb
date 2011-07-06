@@ -1,0 +1,38 @@
+<h1>Patch Commute Info</h1>
+
+<form name="actions" onSubmit="handleIndexButton()">
+<table>
+<tr>
+<td>Choose Transit System&nbsp;&nbsp;</td><td>
+<select name="system">
+<option value="mta">MTA (New York Subways)</option>
+</select>
+</td></tr>
+<tr>
+<td><select name="stop" class="stop_select">
+<%= options_from_collection_for_select(@stop_list, 'stop_id', 'stop_name') %>
+</select> 
+</td><td><input type="submit" name="stops" value="Next trains from this Stop" /></td>
+</tr>
+<tr>
+<td>
+<table>
+  <tr><td>From:</td>
+    <td><select name="stop1" class="stop_select">
+    <%= options_from_collection_for_select(@stop_list, 'stop_id', 'stop_name') %>
+    </select></td>
+  </tr>
+  <tr><td>To:</td>
+    <td><select name="stop2" class="stop_select">
+    <%= options_from_collection_for_select(@stop_list, 'stop_id', 'stop_name') %>
+    </select></td>
+  </tr>
+</table>
+</td>
+<td><input type="submit" name="route" value="Best Route between two Stops" /></td>
+</tr>
+<tr>
+<td>Nearest Stations</td><td>&nbsp;</td>
+</tr>
+</table>
+</form>

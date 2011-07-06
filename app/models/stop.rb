@@ -1,5 +1,6 @@
 require 'number_formatter'
 require 'rbtree'
+require 'stops_helper'
 
 # A Stop is a station where one or more Routes intersect
 class Stop < ActiveRecord::Base
@@ -114,10 +115,10 @@ class Stop < ActiveRecord::Base
     return Stop.neighbor_nodes_on_foot(self.stop_lat, self.stop_lon,max,limit)
   end
   
-  @@all_stops_ = []
+  @@all_stops = []
   # Returns a list of all stops in the system
   def self.all_stops
-    if @@all_stops_.present?
+    if @@all_stops.present?
       puts "have all_stops"
     else
       temp = self.find(:all, :order => 'stop_name')
@@ -125,10 +126,11 @@ class Stop < ActiveRecord::Base
         rs = st.routes_at_stop.join(",")
         st.stop_name += " ("+rs+")"
       end
-      @@all_stops_ = temp
+      @@all_stops = temp
     end
     
-    return @@all_stops_
+    puts "all_stops size #{@@all_stops.size} self #{self.__id__.to_s(16)}"
+    return @@all_stops
   end
   
   def routes_at_stop
