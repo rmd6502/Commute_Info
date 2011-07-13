@@ -20,7 +20,7 @@
 <tr>
 <form name="route" action="<%= url_for(:action => 'route', :controller => 'route_info') %>">
 <td>
-<table>
+<table  width="100%">
   <tr><td>From:</td>
     <td><input type=text name="start" width="100%"></td>
   </tr>
@@ -37,7 +37,7 @@
 </tr>
 <tr>
 	<form name="nearest" action="<%= url_for(:action => 'nearest_stations', :controller => 'station_info') %>">
-	<td><input type=text name="start"></td>
+	<td><input type=text name="start" width="100%"></td>
 <td><input type=submit value="Nearest Stations"/></td>
 </form>
 </tr>

@@ -23,15 +23,16 @@ class RouteInfoController < ApplicationController
       at_time = Time.now
     end
     
+    puts "at_time #{at_time.localtime.inspect}"
     trip_cals = Calendar.entries_for_time(at_time).collect { |c| c.service_id }.flatten
     
     @stop_times = []
     if routes.present?
       routes.each do |r|
-        trips = StopTime.find_by_sql ['select * from stop_times where stop_id in (?) and departure_time >= ? and trip_id in (select trip_id from trips where trip_id in (?) and route_id in (?)) limit ?',stops, Time.now.strftime('%H:%M:%S'), trip_list, routes, limit]
+        trips = StopTime.find_by_sql ['select * from stop_times where stop_id in (?) and departure_time >= ? and trip_id in (select trip_id from trips where trip_id in (?) and route_id in (?)) limit ?',stops, at_time, trip_list, routes, limit]
       end
     else
-      trips = StopTime.joins("inner join trips as tr on stop_times.trip_id = tr.trip_id").where(["tr.service_id in (?)", trip_cals]).where(:stop_id => stops).where(["departure_time >= ?", at_time]).order(:departure_time).limit(limit)
+      trips = StopTime.joins("inner join trips as tr on stop_times.trip_id = tr.trip_id").where(["tr.service_id in (?)", trip_cals]).where(:stop_id => stops).where(["departure_time >= ?", at_time.strftime('%H:%M:%S')]).order(:departure_time).limit(limit)
     end
     
     #trips = StopTime.where(:stop_id => stops).where(['departure_time >= ?', at_time.strftime('%H:%M:%S')]).where(:route_id => routes).limit(limit)
