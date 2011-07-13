@@ -11,7 +11,7 @@
 <% phi = @from_point.heading_to(to_point) %>
 <% ratio = Math::sin(phi.radians).abs + Math::cos(phi.radians).abs %>
   <tr>
-    <td><%= stop.stop_id %>/<%= stop.stop_name %></td><td><%= @from_point.distance_to(to_point) %></td><td><%= @from_point.distance_to(to_point) * ratio %></td>
+    <td><%= stop.stop_name %></td><td><%= @from_point.distance_to(to_point).round(3) %></td><td><%= (@from_point.distance_to(to_point) * ratio).round(3) %></td>
   </tr>
 <% end %>
 </table>

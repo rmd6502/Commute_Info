@@ -36,7 +36,7 @@ class RouteInfoController < ApplicationController
     
     #trips = StopTime.where(:stop_id => stops).where(['departure_time >= ?', at_time.strftime('%H:%M:%S')]).where(:route_id => routes).limit(limit)
     trips.each do |t|
-      @stop_times << { :route => t.trip.route_id, :time => t.departure_time }
+      @stop_times << { :route => t.trip.route_id, :time => t.departure_time, :headsign => t.trip.trip_headsign }
     end
     respond_to do |fmt|
       fmt.html

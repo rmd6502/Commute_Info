@@ -3,11 +3,14 @@
   <tr>
     <th>Route</th>
     <th>Time</th>
+    <th>Route Description</th>
   </tr>
 
 <% @stop_times.each do |st| %>
   <tr>
-    <td><%= st[:route] %></td><td><%= st[:time] %></td>
+    <td><%= st[:route] %></td><td><%= st[:time] %></td><td><%= st[:headsign] %></td>
   </tr>
 <% end %>
 </table>
+
+<%= link_to "Back to Main Page", :action => 'index', :controller => 'application' %>

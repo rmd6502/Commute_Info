@@ -13,7 +13,7 @@ class StationInfoController < ApplicationController
     else
       limit = 5
     end
-    @stops = Stop.neighbor_nodes_on_foot(@from_point.lat,@from_point.lng,20,limit).collect {|s| s[:Stop] }
+    @stops = Stop.neighbor_nodes_on_foot(@from_point.lat,@from_point.lng,10,limit).collect {|s,t| t[:Stop] }
     respond_to do |fmt|
       fmt.json { render :layout => false, :json => @stops.to_json }
       fmt.xml { render :layout => false, :xml => @stops.to_xml }
