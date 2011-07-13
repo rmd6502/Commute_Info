@@ -22,14 +22,10 @@
 <td>
 <table>
   <tr><td>From:</td>
-    <td><select name="stop1" class="stop_select">
-    <%= options_from_collection_for_select(@stop_list, 'stop_id', 'stop_name') %>
-    </select></td>
+    <td><input type=text name="start"></td>
   </tr>
   <tr><td>To:</td>
-    <td><select name="stop2" class="stop_select">
-    <%= options_from_collection_for_select(@stop_list, 'stop_id', 'stop_name') %>
-    </select></td>
+    <td><input type=text name="end"></td>
   </tr>
 </table>
 </td>
