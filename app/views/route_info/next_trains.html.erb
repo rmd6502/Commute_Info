@@ -1,0 +1,13 @@
+<% require 'number_formatter' %>
+<table cellspacing="10px">
+  <tr>
+    <th>Route</th>
+    <th>Time</th>
+  </tr>
+
+<% @stop_times.each do |st| %>
+  <tr>
+    <td><%= st[:route] %></td><td><%= st[:time] %></td>
+  </tr>
+<% end %>
+</table>

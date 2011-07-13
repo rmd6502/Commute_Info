@@ -5,10 +5,10 @@ class RouteInfoController < ApplicationController
 
   def next_trains()
     routes = params[:trains]
-    stops = params[:stops]
+    stops = params[:stop]
 
     if stops == nil
-      flash[:notice] << "need 'stops' parameter"
+      flash[:notice] << "need 'stop' parameter"
       redirect_to :action => 'error'
     end
 
@@ -23,19 +23,23 @@ class RouteInfoController < ApplicationController
       at_time = Time.now
     end
     
+    trip_cals = Calendar.entries_for_time(at_time).collect { |c| c.service_id }.flatten
+    
     @stop_times = []
-    routes.each do |r|
-      if routes.present?
-        trips = StopTime.find_by_sql ['select * from stop_times where stop_id in (?) and departure_time >= ? and trip_id in (select trip_id from trips where route_id in (?)) limit ?',stops, Time.now.strftime('%H:%M:%S'), routes, limit]
-      else
-        trips = StopTime.find_by_sql ['select * from stop_times where stop_id in (?) and departure_time >= ?) limit ?',stops, Time.now.strftime('%H:%M:%S'), limit]
+    if routes.present?
+      routes.each do |r|
+        trips = StopTime.find_by_sql ['select * from stop_times where stop_id in (?) and departure_time >= ? and trip_id in (select trip_id from trips where trip_id in (?) and route_id in (?)) limit ?',stops, Time.now.strftime('%H:%M:%S'), trip_list, routes, limit]
       end
-      #trips = StopTime.where(:stop_id => stops).where(['departure_time >= ?', at_time.strftime('%H:%M:%S')]).where(:route_id => routes).limit(limit)
-      trips.each do |t|
-        @stop_times << { :route => r, :time => t.departure_time }
-      end
+    else
+      trips = StopTime.joins("inner join trips as tr on stop_times.trip_id = tr.trip_id").where(["tr.service_id in (?)", trip_cals]).where(:stop_id => stops).where(["departure_time >= ?", at_time]).order(:departure_time).limit(limit)
+    end
+    
+    #trips = StopTime.where(:stop_id => stops).where(['departure_time >= ?', at_time.strftime('%H:%M:%S')]).where(:route_id => routes).limit(limit)
+    trips.each do |t|
+      @stop_times << { :route => t.trip.route_id, :time => t.departure_time }
     end
     respond_to do |fmt|
+      fmt.html
       fmt.json { render :layout => false, :json => @stop_times.to_json }
       fmt.xml { render :layout => false, :xml => @stop_times.to_xml }
     end

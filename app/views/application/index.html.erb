@@ -1,6 +1,5 @@
 <h1>Patch Commute Info</h1>
 
-<form name="actions" onSubmit="handleIndexButton()">
 <table>
 <tr>
 <td>Choose Transit System&nbsp;&nbsp;</td><td>
@@ -9,10 +8,14 @@
 </select>
 </td></tr>
 <tr>
+<form name="stops" action="<%= url_for(:action => 'next_trains', :controller => 'route_info') %>">
 <td><select name="stop" class="stop_select">
 <%= options_from_collection_for_select(@stop_list, 'stop_id', 'stop_name') %>
 </select> 
-</td><td><input type="submit" name="stops" value="Next trains from this Stop" /></td>
+</td><td>
+      <input type='submit' value='Next trains at this Stop' />
+  </td>
+  </form>
 </tr>
 <tr>
 <td>
@@ -29,10 +32,9 @@
   </tr>
 </table>
 </td>
-<td><input type="submit" name="route" value="Best Route between two Stops" /></td>
+<td><%= button_to "Route", :action => 'route', :controller => 'route_info' %></td>
 </tr>
 <tr>
 <td>Nearest Stations</td><td>&nbsp;</td>
 </tr>
 </table>
-</form>
