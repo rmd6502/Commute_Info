@@ -11,6 +11,7 @@ class ApplicationController < ActionController::Base
   # Entry point for the app
   def index
     @stop_list = Stop.all_stops
+    @route_list = Route.all_routes
     respond_to do |fmt|
       fmt.html
     end

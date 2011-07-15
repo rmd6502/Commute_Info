@@ -18,6 +18,16 @@
   </form>
 </tr>
 <tr>
+<form name="status" action="<%= url_for(:action => 'route_status', :controller => 'route_info') %>">
+<td><select name="route" class="route_select">
+<%= options_for_select(@route_list) %>
+</select> 
+</td><td>
+      <input type='submit' value='Route Status' />
+  </td>
+  </form>
+</tr>
+<tr>
 <form name="route" action="<%= url_for(:action => 'route', :controller => 'route_info') %>">
 <td>
 <table width=100% >

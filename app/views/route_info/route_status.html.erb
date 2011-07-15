@@ -4,3 +4,5 @@
 <div class="headline"><%= @route_stat[:headline]%></div>
 <div class="details"><%=sanitize @route_stat[:details]%></div>
 <% end %>
+
+<%= link_to "Back to Main Page", :action => 'index', :controller => 'application' %>
