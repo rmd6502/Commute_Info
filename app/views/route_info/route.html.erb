@@ -10,7 +10,12 @@
 <% @result.each do |result| %>
   <tr>
     <% total_time += result[:Time] %>
-    <td><%= result[:Method] %></td><td><%= result[:Time].format_as_time %></td><td><%= total_time.format_as_time %></td>
+    <td><%=h result[:Method] %>
+    	<% if result.has_key? :Alert %>
+    		<%= link_to result[:Alert][:announcement], :action => 'route_status' , :route => result[:Route] %>
+    	<% end %></td>
+    <td><%=h result[:Time].format_as_time %></td>
+    <td><%=h total_time.format_as_time %></td>
   </tr>
 <% end %>
 </table>

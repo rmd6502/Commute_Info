@@ -1,5 +1,6 @@
 class RouteInfoController < ApplicationController
   include Geokit::Geocoders
+  include RouteInfoHelper
   require "stop_time"
   require "astar"
 
@@ -50,9 +51,29 @@ class RouteInfoController < ApplicationController
     @result = nil
     from_point = GeoKit::Geocoders::MultiGeocoder.geocode(params[:start])
     to_point = GeoKit::Geocoders::MultiGeocoder.geocode(params[:end])
-    @result = AStar.new.route(from_point.lat,from_point.lng,to_point.lat,to_point.lng)
+    @result = []
+    temp = AStar.new.route(from_point.lat,from_point.lng,to_point.lat,to_point.lng)
+    temp.each() do |step|
+      if step.has_key? :Route
+        announce = isRouteDelayed?(step[:Route], Time.now)
+        step[:Alert] = announce
+      end
+      @result << step
+    end
     respond_to do |fmt|
       fmt.html
+      fmt.json { render :layout => false, :json => @result.to_json }
+      fmt.xml { render :layout => false, :xml => @result.to_xml }
+    end
+  end
+  
+  def route_status()
+    route=params[:route]
+    @route_stat = isRouteDelayed?(route,Time.now)
+    respond_to do |fmt|
+      fmt.html
+      fmt.json { render :layout => false, :json => @route_stat.to_json }
+      fmt.xml { render :layout => false, :xml => @route_stat.to_xml }
     end
   end
 

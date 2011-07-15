@@ -1,0 +1,6 @@
+<% if @route_stat == nil %>
+<h1>No known issues</h1>
+<% else %>
+<div class="headline"><%= @route_stat[:headline]%></div>
+<div class="details"><%=sanitize @route_stat[:details]%></div>
+<% end %>

@@ -73,6 +73,7 @@ class Stop < ActiveRecord::Base
         end
         stop_set.add s.stop
         ret[tm] = {
+          :Route => t.route_id,
           :Stop => s.stop,
           :Method => method,
           :Time => tm,
