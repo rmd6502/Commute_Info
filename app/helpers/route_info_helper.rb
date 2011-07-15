@@ -11,6 +11,7 @@ module RouteInfoHelper
       route = route[0].upcase
       # TODO: Do we need to parse/compare date and time of the announcement against tm?
       if lines[route]
+        puts "found a delay #{info.inspect}"
         return {
           :announcement => info.search('status').text,
           :headline => info.search('plannedworkheadline').text,
@@ -18,5 +19,6 @@ module RouteInfoHelper
         }
       end
     end
+    return nil
   end
 end

@@ -56,7 +56,10 @@ class RouteInfoController < ApplicationController
     temp.each() do |step|
       if step.has_key? :Route
         announce = isRouteDelayed?(step[:Route], Time.now)
-        step[:Alert] = announce
+        if announce != nil
+          step[:Alert] = announce
+        end
+        puts "step #{step.inspect}"
       end
       @result << step
     end

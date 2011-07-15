@@ -11,9 +11,10 @@
   <tr>
     <% total_time += result[:Time] %>
     <td><%=h result[:Method] %>
-    	<% if result.has_key? :Alert %>
-    		<%= link_to result[:Alert][:announcement], :action => 'route_status' , :route => result[:Route] %>
-    	<% end %></td>
+    	<% if result.has_key? :Alert and result[:Alert] != nil %>
+    		<%= link_to result[:Alert][:announcement].to_s, :action => "route_status", :route => result[:Route], :class => 'alert_link' %>
+    	<% end %>
+    </td>
     <td><%=h result[:Time].format_as_time %></td>
     <td><%=h total_time.format_as_time %></td>
   </tr>

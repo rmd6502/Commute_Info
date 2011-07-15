@@ -2,5 +2,5 @@
 
 require ::File.expand_path('../config/environment',  __FILE__)
 
-Stop.all_stops
+#Stop.all_stops
 run CommuteInfo::Application

@@ -5,3 +5,12 @@
 .input_box {
 	width: 95%;
 }
+
+.alert_link {
+	background-color: red;
+}
+
+.headline {
+	font-size: larger;
+	border-bottom: solid;
+}
