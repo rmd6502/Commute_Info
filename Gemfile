@@ -14,6 +14,7 @@ gem 'paperclip'
 gem 'geokit'
 gem 'activerecord-import'
 gem 'rbtree'
+gem 'nokogiri'
 
 gem 'aub-record_filter'
 gem 'ruby-debug-base19', "0.11.24"
