@@ -23,6 +23,7 @@ class RouteInfoController < ApplicationController
     else
       at_time = Time.now
     end
+    base_time = Time.local(at_time.year, at_time.mon, at_time.mday)
     
     puts "at_time #{at_time.localtime.inspect}"
     trip_cals = Calendar.entries_for_time(at_time).collect { |c| c.service_id }.flatten
@@ -38,7 +39,8 @@ class RouteInfoController < ApplicationController
     
     #trips = StopTime.where(:stop_id => stops).where(['departure_time >= ?', at_time.strftime('%H:%M:%S')]).where(:route_id => routes).limit(limit)
     trips.each do |t|
-      @stop_times << { :route => t.trip.route_id, :time => t.departure_time, :headsign => t.trip.trip_headsign }
+      dt = t.departure_time.hour * 3600 + t.departure_time.min * 60 + t.departure_time.sec
+      @stop_times << { :route => t.trip.route_id, :time => base_time + dt, :headsign => t.trip.trip_headsign }
     end
     respond_to do |fmt|
       fmt.html
