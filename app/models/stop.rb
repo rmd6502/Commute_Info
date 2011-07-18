@@ -58,6 +58,7 @@ class Stop < ActiveRecord::Base
         next if s.stop_sequence <= stop_seq
         next if stop_set.include? s.stop
         stopcount = (s.stop_sequence - stop_seq)
+        #next if stopcount != 1
         method = ""
         if dif_time > 0
           method = "Wait " + dif_time_string + ", then "

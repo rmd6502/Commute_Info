@@ -14,15 +14,15 @@ class AStar
   end
 
   # The nominal score of a particular route.  Takes into effect travel time, wait time, and whether you rode or walked
-  def score(node)
+  def score(node, last_node = nil)
     base_t = node[:Time]
     # waiting has a 10% penalty
     if node.has_key? :WaitTime
       base_t += node[:WaitTime] * 0.1
     end
     # transferring has a 20% penalty
-    if node.has_key? :StopTime
-      base_t += (node[:Time] - node[:WaitTime])*0.2
+    if last_node.present? and last_node.has_key? :Route and node.has_key? :Route and node[:Route] != last_node[:Route]
+      base_t += (node[:Time] - node[:WaitTime])*0.4
     else
       # walking has a 40% penalty
       base_t += (node[:Time]) * 0.4
@@ -55,14 +55,16 @@ class AStar
       hsc = spn[:Time] + 3600.0 * here.distance_to(there) / AVERAGE_SPEED
       h_score[sp.stop_id] = hsc
       sc += hsc
-      f_score[sc] = sp
+      f_score[sc] = spn
       @methods[sp.stop_id] = spn
     end
 
     while openSet.length > 0
       x = nil
+      from_node = nil
       f_score.each do |fkv|
-        x = fkv[1]
+        from_node = fkv[1]
+        x = from_node[:Stop]
         break if openSet.include? x.stop_id
       end
       if end_points.include? x.stop_id
@@ -97,7 +99,7 @@ class AStar
         #puts "Node "+node.inspect
         node_stop = node[:Stop]
         next if closedSet.include? node_stop.stop_id
-        tsc = score(node)
+        tsc = score(node, from_node)
 
         tentative_g_score = g_score[x.stop_id] + tsc
         if !openSet.include? node_stop.stop_id
@@ -120,7 +122,7 @@ class AStar
           hsc = 3600.0 * here.distance_to(there) * ratio / AVERAGE_SPEED
           sc += hsc
           h_score[node_stop.stop_id] = hsc
-          f_score[sc] = node_stop
+          f_score[sc] = node
           @methods[node_stop.stop_id] = node
           count = count + 1
         end
